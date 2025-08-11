@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market Countdown - All Brokers</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.4/luxon.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .counter:hover {
+            transform: scale(1.02);
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="max-w-2xl w-full">
+        <h1 class="text-4xl font-bold text-center text-indigo-400 mb-4">Stock Market Countdown</h1>
+        <p class="text-center text-gray-300 mb-6">Live countdowns to US market pre-market and regular open times for various brokers, shown in Eastern Time (ET) and your selected local timezone. Select a broker and country below. Markets are closed on weekends and US holidays; skips to next trading day.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="broker-select" class="block text-sm font-medium text-gray-200 mb-2">Choose Broker</label>
+                <select id="broker-select" onchange="updateBroker()" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200">
+                    <option value="standard">Standard (4:00 AM ET)</option>
+                    <option value="tastytrade">tastytrade (8:00 AM ET)</option>
+                    <option value="interactive_brokers">Interactive Brokers (4:00 AM ET)</option>
+                    <option value="webull">Webull (4:00 AM ET)</option>
+                    <option value="moomoo">Moomoo (4:00 AM ET)</option>
+                    <option value="tradestation">TradeStation (4:00 AM ET)</option>
+                    <option value="alpaca">Alpaca Trading (4:00 AM ET)</option>
+                    <option value="lightspeed">Lightspeed (4:00 AM ET)</option>
+                    <option value="tradezero">TradeZero (4:00 AM ET)</option>
+                </select>
+            </div>
+            <div>
+                <label for="country-select" class="block text-sm font-medium text-gray-200 mb-2">Choose Country/Timezone</label>
+                <select id="country-select" onchange="updateCountry()" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200">
+                    <option value="auto|auto">Auto Detected</option>
+                    <option value="Afghanistan|Asia/Kabul">Afghanistan (Asia/Kabul, +04:30)</option>
+                    <option value="Albania|Europe/Tirane">Albania (Europe/Tirane, CET/CEST)</option>
+                    <option value="Algeria|Africa/Algiers">Algeria (Africa/Algiers, CET)</option>
+                    <option value="Andorra|Europe/Andorra">Andorra (Europe/Andorra, CET/CEST)</option>
+                    <option value="Angola|Africa/Luanda">Angola (Africa/Luanda, WAT)</option>
+                    <option value="Argentina|America/Argentina/Buenos_Aires">Argentina (America/Argentina/Buenos_Aires, ART)</option>
+                    <option value="Armenia|Asia/Yerevan">Armenia (Asia/Yerevan, +04)</option>
+                    <option value="Australia|Australia/Sydney">Australia (Australia/Sydney, AEST/AEDT)</option>
+                    <option value="Australia|Australia/Brisbane">Australia (Australia/Brisbane, AEST)</option>
+                    <option value="Australia|Australia/Perth">Australia (Australia/Perth, AWST)</option>
+                    <option value="Austria|Europe/Vienna">Austria (Europe/Vienna, CET/CEST)</option>
+                    <option value="Azerbaijan|Asia/Baku">Azerbaijan (Asia/Baku, +04)</option>
+                    <option value="Bahamas|America/Nassau">Bahamas (America/Nassau, EST/EDT)</option>
+                    <option value="Bahrain|Asia/Bahrain">Bahrain (Asia/Bahrain, +03)</option>
+                    <option value="Bangladesh|Asia/Dhaka">Bangladesh (Asia/Dhaka, +06)</option>
+                    <option value="Barbados|America/Barbados">Barbados (America/Barbados, AST)</option>
+                    <option value="Belarus|Europe/Minsk">Belarus (Europe/Minsk, +03)</option>
+                    <option value="Belgium|Europe/Brussels">Belgium (Europe/Brussels, CET/CEST)</option>
+                    <option value="Belize|America/Belize">Belize (America/Belize, CST)</option>
+                    <option value="Benin|Africa/Porto-Novo">Benin (Africa/Porto-Novo, WAT)</option>
+                    <option value="Bhutan|Asia/Thimphu">Bhutan (Asia/Thimphu, +06)</option>
+                    <option value="Bolivia|America/La_Paz">Bolivia (America/La_Paz, BOT)</option>
+                    <option value="Bosnia and Herzegovina|Europe/Sarajevo">Bosnia and Herzegovina (Europe/Sarajevo, CET/CEST)</option>
+                    <option value="Botswana|Africa/Gaborone">Botswana (Africa/Gaborone, CAT)</option>
+                    <option value="Brazil|America/Sao_Paulo">Brazil (America/Sao_Paulo, BRT/BRST)</option>
+                    <option value="Brunei|Asia/Brunei">Brunei (Asia/Brunei, +08)</option>
+                    <option value="Bulgaria|Europe/Sofia">Bulgaria (Europe/Sofia, EET/EEST)</option>
+                    <option value="Burkina Faso|Africa/Ouagadougou">Burkina Faso (Africa/Ouagadougou, GMT)</option>
+                    <option value="Burundi|Africa/Bujumbura">Burundi (Africa/Bujumbura, CAT)</option>
+                    <option value="Cambodia|Asia/Phnom_Penh">Cambodia (Asia/Phnom_Penh, +07)</option>
+                    <option value="Cameroon|Africa/Douala">Cameroon (Africa/Douala, WAT)</option>
+                    <option value="Canada|America/Toronto">Canada (America/Toronto, EST/EDT)</option>
+                    <option value="Canada|America/Vancouver">Canada (America/Vancouver, PST/PDT)</option>
+                    <option value="Canada|America/Winnipeg">Canada (America/Winnipeg, CST/CDT)</option>
+                    <option value="Cape Verde|Atlantic/Cape_Verde">Cape Verde (Atlantic/Cape_Verde, -01)</option>
+                    <option value="Chad|Africa/Ndjamena">Chad (Africa/Ndjamena, WAT)</option>
+                    <option value="Chile|America/Santiago">Chile (America/Santiago, CLT/CLST)</option>
+                    <option value="China|Asia/Shanghai">China (Asia/Shanghai, CST)</option>
+                    <option value="Colombia|America/Bogota">Colombia (America/Bogota, COT)</option>
+                    <option value="Comoros|Indian/Comoro">Comoros (Indian/Comoro, EAT)</option>
+                    <option value="Congo (DRC)|Africa/Kinshasa">Congo (DRC) (Africa/Kinshasa, WAT)</option>
+                    <option value="Congo|Africa/Brazzaville">Congo (Africa/Brazzaville, WAT)</option>
+                    <option value="Costa Rica|America/Costa_Rica">Costa Rica (America/Costa_Rica, CST)</option>
+                    <option value="Côte d'Ivoire|Africa/Abidjan">Côte d'Ivoire (Africa/Abidjan, GMT)</option>
+                    <option value="Croatia|Europe/Zagreb">Croatia (Europe/Zagreb, CET/CEST)</option>
+                    <option value="Cuba|America/Havana">Cuba (America/Havana, CST/CDT)</option>
+                    <option value="Cyprus|Asia/Nicosia">Cyprus (Asia/Nicosia, EET/EEST)</option>
+                    <option value="Czech Republic|Europe/Prague">Czech Republic (Europe/Prague, CET/CEST)</option>
+                    <option value="Denmark|Europe/Copenhagen">Denmark (Europe/Copenhagen, CET/CEST)</option>
+                    <option value="Djibouti|Africa/Djibouti">Djibouti (Africa/Djibouti, EAT)</option>
+                    <option value="Dominica|America/Dominica">Dominica (America/Dominica, AST)</option>
+                    <option value="Dominican Republic|America/Santo_Domingo">Dominican Republic (America/Santo_Domingo, AST)</option>
+                    <option value="Ecuador|America/Guayaquil">Ecuador (America/Guayaquil, -05)</option>
+                    <option value="Egypt|Africa/Cairo">Egypt (Africa/Cairo, EET)</option>
+                    <option value="El Salvador|America/El_Salvador">El Salvador (America/El_Salvador, CST)</option>
+                    <option value="Equatorial Guinea|Africa/Malabo">Equatorial Guinea (Africa/Malabo, WAT)</option>
+                    <option value="Eritrea|Africa/Asmara">Eritrea (Africa/Asmara, EAT)</option>
+                    <option value="Estonia|Europe/Tallinn">Estonia (Europe/Tallinn, EET/EEST)</option>
+                    <option value="Eswatini|Africa/Mbabane">Eswatini (Africa/Mbabane, SAST)</option>
+                    <option value="Ethiopia|Africa/Addis_Ababa">Ethiopia (Africa/Addis_Ababa, EAT)</option>
+                    <option value="Fiji|Pacific/Fiji">Fiji (Pacific/Fiji, +12)</option>
+                    <option value="Finland|Europe/Helsinki">Finland (Europe/Helsinki, EET/EEST)</option>
+                    <option value="France|Europe/Paris">France (Europe/Paris, CET/CEST)</option>
+                    <option value="Gabon|Africa/Libreville">Gabon (Africa/Libreville, WAT)</option>
+                    <option value="Gambia|Africa/Banjul">Gambia (Africa/Banjul, GMT)</option>
+                    <option value="Georgia|Asia/Tbilisi">Georgia (Asia/Tbilisi, +04)</option>
+                    <option value="Germany|Europe/Berlin">Germany (Europe/Berlin, CET/CEST)</option>
+                    <option value="Ghana|Africa/Accra">Ghana (Africa/Accra, GMT)</option>
+                    <option value="Greece|Europe/Athens">Greece (Europe/Athens, EET/EEST)</option>
+                    <option value="Grenada|America/Grenada">Grenada (America/Grenada, AST)</option>
+                    <option value="Guatemala|America/Guatemala">Guatemala (America/Guatemala, CST)</option>
+                    <option value="Guinea|Africa/Conakry">Guinea (Africa/Conakry, GMT)</option>
+                    <option value="Guinea-Bissau|Africa/Bissau">Guinea-Bissau (Africa/Bissau, GMT)</option>
+                    <option value="Guyana|America/Guyana">Guyana (America/Guyana, -04)</option>
+                    <option value="Haiti|America/Port-au-Prince">Haiti (America/Port-au-Prince, EST/EDT)</option>
+                    <option value="Honduras|America/Tegucigalpa">Honduras (America/Tegucigalpa, CST)</option>
+                    <option value="Hong Kong|Asia/Hong_Kong">Hong Kong (Asia/Hong_Kong, HKT)</option>
+                    <option value="Hungary|Europe/Budapest">Hungary (Europe/Budapest, CET/CEST)</option>
+                    <option value="Iceland|Atlantic/Reykjavik">Iceland (Atlantic/Reykjavik, GMT)</option>
+                    <option value="India|Asia/Kolkata">India (Asia/Kolkata, IST)</option>
+                    <option value="Indonesia|Asia/Jakarta">Indonesia (Asia/Jakarta, WIB/+07)</option>
+                    <option value="Indonesia|Asia/Makassar">Indonesia (Asia/Makassar, WITA/+08)</option>
+                    <option value="Indonesia|Asia/Jayapura">Indonesia (Asia/Jayapura, WIT/+09)</option>
+                    <option value="Iran|Asia/Tehran">Iran (Asia/Tehran, IRST)</option>
+                    <option value="Iraq|Asia/Baghdad">Iraq (Asia/Baghdad, AST)</option>
+                    <option value="Ireland|Europe/Dublin">Ireland (Europe/Dublin, GMT/IST)</option>
+                    <option value="Israel|Asia/Jerusalem">Israel (Asia/Jerusalem, IST/IDT)</option>
+                    <option value="Italy|Europe/Rome">Italy (Europe/Rome, CET/CEST)</option>
+                    <option value="Jamaica|America/Jamaica">Jamaica (America/Jamaica, EST)</option>
+                    <option value="Japan|Asia/Tokyo">Japan (Asia/Tokyo, JST)</option>
+                    <option value="Jordan|Asia/Amman">Jordan (Asia/Amman, +03)</option>
+                    <option value="Kazakhstan|Asia/Almaty">Kazakhstan (Asia/Almaty, +06)</option>
+                    <option value="Kenya|Africa/Nairobi">Kenya (Africa/Nairobi, EAT)</option>
+                    <option value="Kiribati|Pacific/Tarawa">Kiribati (Pacific/Tarawa, +12)</option>
+                    <option value="Kuwait|Asia/Kuwait">Kuwait (Asia/Kuwait, +03)</option>
+                    <option value="Kyrgyzstan|Asia/Bishkek">Kyrgyzstan (Asia/Bishkek, +06)</option>
+                    <option value="Laos|Asia/Vientiane">Laos (Asia/Vientiane, +07)</option>
+                    <option value="Latvia|Europe/Riga">Latvia (Europe/Riga, EET/EEST)</option>
+                    <option value="Lebanon|Asia/Beirut">Lebanon (Asia/Beirut, EET/EEST)</option>
+                    <option value="Lesotho|Africa/Maseru">Lesotho (Africa/Maseru, SAST)</option>
+                    <option value="Liberia|Africa/Monrovia">Liberia (Africa/Monrovia, GMT)</option>
+                    <option value="Libya|Africa/Tripoli">Libya (Africa/Tripoli, EET)</option>
+                    <option value="Liechtenstein|Europe/Vaduz">Liechtenstein (Europe/Vaduz, CET/CEST)</option>
+                    <option value="Lithuania|Europe/Vilnius">Lithuania (Europe/Vilnius, EET/EEST)</option>
+                    <option value="Luxembourg|Europe/Luxembourg">Luxembourg (Europe/Luxembourg, CET/CEST)</option>
+                    <option value="Madagascar|Indian/Antananarivo">Madagascar (Indian/Antananarivo, EAT)</option>
+                    <option value="Malawi|Africa/Blantyre">Malawi (Africa/Blantyre, CAT)</option>
+                    <option value="Malaysia|Asia/Kuala_Lumpur">Malaysia (Asia/Kuala_Lumpur, MYT)</option>
+                    <option value="Maldives|Indian/Maldives">Maldives (Indian/Maldives, +05)</option>
+                    <option value="Mali|Africa/Bamako">Mali (Africa/Bamako, GMT)</option>
+                    <option value="Malta|Europe/Malta">Malta (Europe/Malta, CET/CEST)</option>
+                    <option value="Mauritania|Africa/Nouakchott">Mauritania (Africa/Nouakchott, GMT)</option>
+                    <option value="Mauritius|Indian/Mauritius">Mauritius (Indian/Mauritius, +04)</option>
+                    <option value="Mexico|America/Mexico_City">Mexico (America/Mexico_City, CST/CDT)</option>
+                    <option value="Moldova|Europe/Chisinau">Moldova (Europe/Chisinau, EET/EEST)</option>
+                    <option value="Monaco|Europe/Monaco">Monaco (Europe/Monaco, CET/CEST)</option>
+                    <option value="Mongolia|Asia/Ulaanbaatar">Mongolia (Asia/Ulaanbaatar, +08)</option>
+                    <option value="Montenegro|Europe/Podgorica">Montenegro (Europe/Podgorica, CET/CEST)</option>
+                    <option value="Morocco|Africa/Casablanca">Morocco (Africa/Casablanca, +01)</option>
+                    <option value="Mozambique|Africa/Maputo">Mozambique (Africa/Maputo, CAT)</option>
+                    <option value="Myanmar|Asia/Yangon">Myanmar (Asia/Yangon, +06:30)</option>
+                    <option value="Namibia|Africa/Windhoek">Namibia (Africa/Windhoek, CAT)</option>
+                    <option value="Nepal|Asia/Kathmandu">Nepal (Asia/Kathmandu, +05:45)</option>
+                    <option value="Netherlands|Europe/Amsterdam">Netherlands (Europe/Amsterdam, CET/CEST)</option>
+                    <option value="New Zealand|Pacific/Auckland">New Zealand (Pacific/Auckland, NZST/NZDT)</option>
+                    <option value="Nicaragua|America/Managua">Nicaragua (America/Managua, CST)</option>
+                    <option value="Niger|Africa/Niamey">Niger (Africa/Niamey, WAT)</option>
+                    <option value="Nigeria|Africa/Lagos">Nigeria (Africa/Lagos, WAT)</option>
+                    <option value="North Korea|Asia/Pyongyang">North Korea (Asia/Pyongyang, KST)</option>
+                    <option value="North Macedonia|Europe/Skopje">North Macedonia (Europe/Skopje, CET/CEST)</option>
+                    <option value="Norway|Europe/Oslo">Norway (Europe/Oslo, CET/CEST)</option>
+                    <option value="Oman|Asia/Muscat">Oman (Asia/Muscat, +04)</option>
+                    <option value="Pakistan|Asia/Karachi">Pakistan (Asia/Karachi, PKT)</option>
+                    <option value="Panama|America/Panama">Panama (America/Panama, EST)</option>
+                    <option value="Papua New Guinea|Pacific/Port_Moresby">Papua New Guinea (Pacific/Port_Moresby, +10)</option>
+                    <option value="Paraguay|America/Asuncion">Paraguay (America/Asuncion, -04)</option>
+                    <option value="Peru|America/Lima">Peru (America/Lima, PET)</option>
+                    <option value="Philippines|Asia/Manila">Philippines (Asia/Manila, PST)</option>
+                    <option value="Poland|Europe/Warsaw">Poland (Europe/Warsaw, CET/CEST)</option>
+                    <option value="Portugal|Europe/Lisbon">Portugal (Europe/Lisbon, WET/WEST)</option>
+                    <option value="Qatar|Asia/Qatar">Qatar (Asia/Qatar, +03)</option>
+                    <option value="Romania|Europe/Bucharest">Romania (Europe/Bucharest, EET/EEST)</option>
+                    <option value="Russia|Europe/Moscow">Russia (Europe/Moscow, MSK)</option>
+                    <option value="Rwanda|Africa/Kigali">Rwanda (Africa/Kigali, CAT)</option>
+                    <option value="Saudi Arabia|Asia/Riyadh">Saudi Arabia (Asia/Riyadh, AST)</option>
+                    <option value="Senegal|Africa/Dakar">Senegal (Africa/Dakar, GMT)</option>
+                    <option value="Serbia|Europe/Belgrade">Serbia (Europe/Belgrade, CET/CEST)</option>
+                    <option value="Seychelles|Indian/Mahe">Seychelles (Indian/Mahe, +04)</option>
+                    <option value="Sierra Leone|Africa/Freetown">Sierra Leone (Africa/Freetown, GMT)</option>
+                    <option value="Singapore|Asia/Singapore">Singapore (Asia/Singapore, SGT)</option>
+                    <option value="Slovakia|Europe/Bratislava">Slovakia (Europe/Bratislava, CET/CEST)</option>
+                    <option value="Slovenia|Europe/Ljubljana">Slovenia (Europe/Ljubljana, CET/CEST)</option>
+                    <option value="Somalia|Africa/Mogadishu">Somalia (Africa/Mogadishu, EAT)</option>
+                    <option value="South Africa|Africa/Johannesburg">South Africa (Africa/Johannesburg, SAST)</option>
+                    <option value="South Korea|Asia/Seoul">South Korea (Asia/Seoul, KST)</option>
+                    <option value="South Sudan|Africa/Juba">South Sudan (Africa/Juba, CAT)</option>
+                    <option value="Spain|Europe/Madrid">Spain (Europe/Madrid, CET/CEST)</option>
+                    <option value="Sri Lanka|Asia/Colombo">Sri Lanka (Asia/Colombo, +05:30)</option>
+                    <option value="Sudan|Africa/Khartoum">Sudan (Africa/Khartoum, CAT)</option>
+                    <option value="Suriname|America/Paramaribo">Suriname (America/Paramaribo, -03)</option>
+                    <option value="Sweden|Europe/Stockholm">Sweden (Europe/Stockholm, CET/CEST)</option>
+                    <option value="Switzerland|Europe/Zurich">Switzerland (Europe/Zurich, CET/CEST)</option>
+                    <option value="Syria|Asia/Damascus">Syria (Asia/Damascus, +03)</option>
+                    <option value="Taiwan|Asia/Taipei">Taiwan (Asia/Taipei, CST)</option>
+                    <option value="Tajikistan|Asia/Dushanbe">Tajikistan (Asia/Dushanbe, +05)</option>
+                    <option value="Tanzania|Africa/Dar_es_Salaam">Tanzania (Africa/Dar_es_Salaam, EAT)</option>
+                    <option value="Thailand|Asia/Bangkok">Thailand (Asia/Bangkok, +07)</option>
+                    <option value="Togo|Africa/Lome">Togo (Africa/Lome, GMT)</option>
+                    <option value="Trinidad and Tobago|America/Port_of_Spain">Trinidad and Tobago (America/Port_of_Spain, AST)</option>
+                    <option value="Tunisia|Africa/Tunis">Tunisia (Africa/Tunis, CET)</option>
+                    <option value="Turkey|Europe/Istanbul">Turkey (Europe/Istanbul, TRT)</option>
+                    <option value="Turkmenistan|Asia/Ashgabat">Turkmenistan (Asia/Ashgabat, +05)</option>
+                    <option value="Uganda|Africa/Kampala">Uganda (Africa/Kampala, EAT)</option>
+                    <option value="Ukraine|Europe/Kiev">Ukraine (Europe/Kiev, EET/EEST)</option>
+                    <option value="United Arab Emirates|Asia/Dubai">United Arab Emirates (Asia/Dubai, +04)</option>
+                    <option value="United Kingdom|Europe/London">United Kingdom (Europe/London, GMT/BST)</option>
+                    <option value="United States|America/New_York">United States (America/New_York, EST/EDT)</option>
+                    <option value="United States|America/Chicago">United States (America/Chicago, CST/CDT)</option>
+                    <option value="United States|America/Los_Angeles">United States (America/Los_Angeles, PST/PDT)</option>
+                    <option value="United States|America/Anchorage">United States (America/Anchorage, AKST/AKDT)</option>
+                    <option value="United States|Pacific/Honolulu">United States (Pacific/Honolulu, HST)</option>
+                    <option value="Uruguay|America/Montevideo">Uruguay (America/Montevideo, -03)</option>
+                    <option value="Uzbekistan|Asia/Tashkent">Uzbekistan (Asia/Tashkent, +05)</option>
+                    <option value="Vanuatu|Pacific/Efate">Vanuatu (Pacific/Efate, +11)</option>
+                    <option value="Venezuela|America/Caracas">Venezuela (America/Caracas, VET)</option>
+                    <option value="Vietnam|Asia/Ho_Chi_Minh">Vietnam (Asia/Ho_Chi_Minh, +07)</option>
+                    <option value="Yemen|Asia/Aden">Yemen (Asia/Aden, +03)</option>
+                    <option value="Zambia|Africa/Lusaka">Zambia (Africa/Lusaka, CAT)</option>
+                    <option value="Zimbabwe|Africa/Harare">Zimbabwe (Africa/Harare, CAT)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="counter bg-gray-800 rounded-lg p-6 mb-4 shadow-lg fade-in">
+            <h2 class="text-xl font-semibold text-indigo-300" id="premarket-label">Premarket Open (4:00 AM ET):</h2>
+            <p class="text-2xl text-red-400 mt-2" id="premarket-countdown">Calculating...</p>
+            <p class="text-lg text-blue-300 italic mt-1" id="premarket-local">Local time: Calculating...</p>
+            <p class="text-sm text-yellow-300 mt-1" id="premarket-note"></p>
+        </div>
+        <div class="counter bg-gray-800 rounded-lg p-6 mb-4 shadow-lg fade-in">
+            <h2 class="text-xl font-semibold text-indigo-300">Regular Market Open (9:30 AM ET):</h2>
+            <p class="text-2xl text-red-400 mt-2" id="market-countdown">Calculating...</p>
+            <p class="text-lg text-blue-300 italic mt-1" id="market-local">Local time: Calculating...</p>
+            <p class="text-sm text-yellow-300 mt-1" id="market-note"></p>
+        </div>
+
+        <div class="text-center text-gray-400 text-sm">
+            <p>Your detected timezone: <span id="user-timezone" class="font-medium">Detecting...</span></p>
+            <p>Selected country/timezone: <span id="selected-country" class="font-medium">Auto Detected</span></p>
+            <p>Current time in ET: <span id="et-time" class="font-medium">Detecting...</span></p>
+            <p>Current time in local: <span id="local-time" class="font-medium">Detecting...</span></p>
+        </div>
+    </div>
+
+    <script>
+        const { DateTime } = luxon;
+
+        // Broker pre-market start times (in ET)
+        const brokers = {
+            standard: { premarketHour: 4, premarketMinute: 0, label: "Standard (4:00 AM ET)" },
+            tastytrade: { premarketHour: 8, premarketMinute: 0, label: "tastytrade (8:00 AM ET)" },
+            interactive_brokers: { premarketHour: 4, premarketMinute: 0, label: "Interactive Brokers (4:00 AM ET)" },
+            webull: { premarketHour: 4, premarketMinute: 0, label: "Webull (4:00 AM ET)" },
+            moomoo: { premarketHour: 4, premarketMinute: 0, label: "Moomoo (4:00 AM ET)" },
+            tradestation: { premarketHour: 4, premarketMinute: 0, label: "TradeStation (4:00 AM ET)" },
+            alpaca: { premarketHour: 4, premarketMinute: 0, label: "Alpaca Trading (4:00 AM ET)" },
+            lightspeed: { premarketHour: 4, premarketMinute: 0, label: "Lightspeed (4:00 AM ET)" },
+            tradezero: { premarketHour: 4, premarketMinute: 0, label: "TradeZero (4:00 AM ET)" }
+        };
+
+        // 2025 NYSE Holidays (full closures)
+        const holidays = [
+            '2025-01-01', // New Year's Day
+            '2025-01-20', // Martin Luther King Jr. Day
+            '2025-02-17', // Washington's Birthday
+            '2025-04-18', // Good Friday
+            '2025-05-26', // Memorial Day
+            '2025-06-19', // Juneteenth
+            '2025-07-04', // Independence Day
+            '2025-09-01', // Labor Day
+            '2025-11-27', // Thanksgiving Day
+            '2025-12-25'  // Christmas Day
+        ];
+
+        // Early close days in 2025 (1:00 PM ET close)
+        const earlyCloses = [
+            '2025-07-03', // Day before Independence Day
+            '2025-12-24'  // Christmas Eve
+        ];
+
+        let localZone = 'auto'; // Default to auto detected
+        let selectedCountry = 'auto';
+
+        // Function to get the effective local zone
+        function getEffectiveLocalZone() {
+            return localZone === 'auto' ? DateTime.now().zoneName : localZone;
+        }
+
+        // Function to check if a date is a weekend
+        function isWeekend(dt) {
+            return dt.weekday > 5; // 6 = Saturday, 7 = Sunday
+        }
+
+        // Function to check if a date is a holiday
+        function isHoliday(dt) {
+            return holidays.includes(dt.toISODate());
+        }
+
+        // Function to check if a date is an early close day
+        function isEarlyClose(dt) {
+            return earlyCloses.includes(dt.toISODate());
+        }
+
+        // Function to format time difference
+        function formatTimeDiff(target) {
+            const now = DateTime.now();
+            const diff = target.diff(now, ['days', 'hours', 'minutes', 'seconds']).toObject();
+
+            if (diff.days < 0 || (diff.days === 0 && diff.hours < 0) || (diff.days === 0 && diff.hours === 0 && diff.minutes < 0)) {
+                return "Already open or past";
+            }
+
+            return `${Math.floor(diff.days)}d ${Math.floor(diff.hours)}h ${Math.floor(diff.minutes)}m ${Math.floor(diff.seconds)}s`;
+        }
+
+        // Function to get next target time in Eastern Time, skipping non-trading days, and convert to local
+        function getNextTarget(hour, minute) {
+            const nowET = DateTime.now().setZone('America/New_York');
+            let targetET = nowET.set({ hour, minute, second: 0, millisecond: 0 });
+
+            // If target time is in the past today, move to next day
+            if (targetET <= nowET) {
+                targetET = targetET.plus({ days: 1 }).set({ hour, minute, second: 0, millisecond: 0 });
+            }
+
+            // Skip weekends and holidays
+            while (isWeekend(targetET) || isHoliday(targetET)) {
+                targetET = targetET.plus({ days: 1 }).set({ hour, minute, second: 0, millisecond: 0 });
+            }
+
+            // Convert to local timezone
+            const effectiveZone = getEffectiveLocalZone();
+            const targetLocal = targetET.setZone(effectiveZone);
+
+            // Check for early close note
+            const note = isEarlyClose(targetET) ? "Note: Market closes early at 1:00 PM ET today." : "";
+
+            return { targetET, targetLocal, note };
+        }
+
+        // Update countdowns and times
+        function updateCountdowns() {
+            const brokerSelect = document.getElementById('broker-select');
+            if (!brokerSelect) return;
+            const selectedBroker = brokerSelect.value;
+            const { premarketHour, premarketMinute } = brokers[selectedBroker];
+
+            const { targetET: premarketTargetET, targetLocal: premarketTargetLocal, note: premarketNote } = getNextTarget(premarketHour, premarketMinute);
+            const { targetET: marketTargetET, targetLocal: marketTargetLocal, note: marketNote } = getNextTarget(9, 30);
+
+            document.getElementById('premarket-label').textContent = `Premarket Open (${brokers[selectedBroker].label}):`;
+            document.getElementById('premarket-countdown').textContent = formatTimeDiff(premarketTargetET);
+            document.getElementById('premarket-local').textContent = `Local time: ${premarketTargetLocal.toFormat('ff')}`;
+            document.getElementById('premarket-note').textContent = premarketNote;
+            document.getElementById('market-countdown').textContent = formatTimeDiff(marketTargetET);
+            document.getElementById('market-local').textContent = `Local time: ${marketTargetLocal.toFormat('ff')}`;
+            document.getElementById('market-note').textContent = marketNote;
+            document.getElementById('user-timezone').textContent = DateTime.now().zoneName;
+            document.getElementById('selected-country').textContent = selectedCountry === 'auto' ? 'Auto Detected' : selectedCountry;
+            document.getElementById('et-time').textContent = DateTime.now().setZone('America/New_York').toFormat('ff');
+            const effectiveZone = getEffectiveLocalZone();
+            document.getElementById('local-time').textContent = DateTime.now().setZone(effectiveZone).toFormat('ff');
+        }
+
+        // Update broker selection
+        function updateBroker() {
+            updateCountdowns();
+        }
+
+        // Update country/timezone selection
+        function updateCountry() {
+            const countrySelect = document.getElementById('country-select');
+            const [country, timezone] = countrySelect.value.split('|');
+            selectedCountry = country;
+            localZone = timezone;
+            updateCountdowns();
+        }
+
+        // Initialize after DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCountry(); // Initial country update
+            updateCountdowns(); // Initial update
+            setInterval(updateCountdowns, 1000); // Update every second
+        });
+    </script>
+</body>
+</html>
